@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Serva — Personal Services</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream: #f5efe6;
+      --ivory: #fdf8f2;
+      --terracotta: #c4622d;
+      --terracotta-light: #e07a49;
+      --amber: #d4a017;
+      --charcoal: #1e1a16;
+      --muted: #7a6e63;
+      --card-bg: #ffffff;
+      --border: rgba(196, 98, 45, 0.15);
+      --shadow: 0 8px 40px rgba(30, 26, 22, 0.10);
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--cream);
+      font-family: 'DM Sans', sans-serif;
+      color: var(--charcoal);
+      overflow-x: hidden;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 0 60px;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(196,98,45,0.12) 0%, transparent 70%),
+        var(--cream);
+    }
+
+    header {
+      width: 100%;
+      max-width: 480px;
+      padding: 44px 28px 24px;
+      text-align: center;
+    }
+    .logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 13px;
+      font-weight: 400;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--terracotta);
+      margin-bottom: 28px;
+      display: block;
+    }
+    header h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(32px, 9vw, 42px);
+      font-weight: 300;
+      line-height: 1.15;
+      color: var(--charcoal);
+      letter-spacing: -0.01em;
+    }
+    header h1 em {
+      font-style: italic;
+      color: var(--terracotta);
+    }
+    header p {
+      font-size: 14px;
+      color: var(--muted);
+      margin-top: 10px;
+      font-weight: 300;
+      line-height: 1.6;
+    }
+
+    .progress-wrap {
+      width: 100%;
+      max-width: 480px;
+      padding: 0 28px 20px;
+    }
+    .progress-steps {
+      display: flex;
+      align-items: center;
+    }
+    .step-dot {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: var(--ivory);
+      border: 2px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--muted);
+      transition: all 0.4s ease;
+      flex-shrink: 0;
+    }
+    .step-dot.active {
+      background: var(--terracotta);
+      border-color: var(--terracotta);
+      color: #fff;
+      transform: scale(1.1);
+    }
+    .step-dot.done {
+      background: var(--amber);
+      border-color: var(--amber);
+      color: #fff;
+    }
+    .step-line {
+      flex: 1;
+      height: 2px;
+      background: var(--border);
+      transition: background 0.4s ease;
+    }
+    .step-line.done { background: var(--amber); }
+    .step-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 6px;
+    }
+    .step-label {
+      font-size: 10px;
+      color: var(--muted);
+      text-align: center;
+      letter-spacing: 0.02em;
+    }
+    .step-label.active { color: var(--terracotta); font-weight: 500; }
+
+    .screen {
+      display: none;
+      width: 100%;
+      max-width: 480px;
+      padding: 0 20px;
+      animation: fadeUp 0.5s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    .screen.active { display: block; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(22px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .section-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 22px;
+      font-weight: 400;
+      color: var(--charcoal);
+      margin-bottom: 6px;
+    }
+    .section-sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 20px;
+      font-weight: 300;
+    }
+
+    .service-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .service-card {
+      background: var(--card-bg);
+      border: 1.5px solid var(--border);
+      border-radius: 18px;
+      padding: 22px 16px 18px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.22,1,0.36,1);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .service-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(196,98,45,0.04), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .service-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); border-color: var(--terracotta-light); }
+    .service-card:hover::before { opacity: 1; }
+    .service-card.selected {
+      border-color: var(--terracotta);
+      background: linear-gradient(135deg, rgba(196,98,45,0.05), rgba(212,160,23,0.04));
+      box-shadow: 0 4px 20px rgba(196,98,45,0.15);
+    }
+    .service-card .icon {
+      font-size: 36px;
+      margin-bottom: 10px;
+      display: block;
+    }
+    .service-card .name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--charcoal);
+      display: block;
+    }
+    .service-card .desc {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+      line-height: 1.4;
+      font-weight: 300;
+    }
+    .service-card .check {
+      position: absolute;
+      top: 10px; right: 10px;
+      width: 20px; height: 20px;
+      background: var(--terracotta);
+      border-radius: 50%;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 11px;
+    }
+    .service-card.selected .check { display: flex; }
+
+    .sub-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .sub-card {
+      background: var(--card-bg);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      padding: 15px 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      transition: all 0.25s ease;
+    }
+    .sub-card:hover { border-color: var(--terracotta-light); transform: translateX(3px); }
+    .sub-card.selected {
+      border-color: var(--terracotta);
+      background: linear-gradient(90deg, rgba(196,98,45,0.05), transparent);
+    }
+    .sub-card .sub-icon { font-size: 24px; flex-shrink: 0; }
+    .sub-card .sub-info { flex: 1; }
+    .sub-card .sub-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--charcoal);
+    }
+    .sub-card .sub-desc { font-size: 12px; color: var(--muted); font-weight: 300; }
+    .sub-card .sub-check {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px;
+      color: transparent;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .sub-card.selected .sub-check {
+      background: var(--terracotta);
+      border-color: var(--terracotta);
+      color: #fff;
+    }
+
+    .service-section {
+      display: none;
+      margin-bottom: 24px;
+      animation: fadeUp 0.4s ease both;
+    }
+    .service-section.visible { display: block; }
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .section-header .s-icon { font-size: 20px; }
+    .section-header .s-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--charcoal);
+    }
+
+    .datetime-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .field-label {
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+    .field-input {
+      width: 100%;
+      background: var(--card-bg);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 11px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      color: var(--charcoal);
+      outline: none;
+      transition: border-color 0.2s;
+      -webkit-appearance: none;
+    }
+    .field-input:focus { border-color: var(--terracotta); }
+    .field-full { grid-column: span 2; }
+
+    .notes-input {
+      width: 100%;
+      background: var(--card-bg);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 11px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      color: var(--charcoal);
+      outline: none;
+      resize: none;
+      height: 80px;
+      transition: border-color 0.2s;
+    }
+    .notes-input:focus { border-color: var(--terracotta); }
+
+    .summary-card {
+      background: var(--card-bg);
+      border: 1.5px solid var(--border);
+      border-radius: 18px;
+      padding: 22px;
+      margin-bottom: 16px;
+    }
+    .summary-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 20px;
+      font-weight: 400;
+      margin-bottom: 16px;
+      color: var(--charcoal);
+    }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(196,98,45,0.08);
+      gap: 10px;
+    }
+    .summary-row:last-child { border-bottom: none; }
+    .summary-label {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 300;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      flex-shrink: 0;
+    }
+    .summary-value {
+      font-size: 14px;
+      color: var(--charcoal);
+      text-align: right;
+      font-weight: 400;
+    }
+    .summary-tag {
+      display: inline-block;
+      background: rgba(196,98,45,0.1);
+      color: var(--terracotta);
+      border-radius: 20px;
+      padding: 3px 10px;
+      font-size: 12px;
+      margin: 2px 2px 2px 0;
+    }
+
+    .email-wrap {
+      background: var(--card-bg);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      padding: 18px 20px;
+      margin-bottom: 16px;
+    }
+    .email-wrap .field-label { margin-bottom: 8px; }
+
+    .btn-primary {
+      width: 100%;
+      background: var(--terracotta);
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      padding: 17px 24px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      letter-spacing: 0.02em;
+      transition: all 0.25s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .btn-primary:hover { background: #b3561e; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(196,98,45,0.35); }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    .btn-secondary {
+      width: 100%;
+      background: transparent;
+      color: var(--muted);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 24px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 8px;
+    }
+    .btn-secondary:hover { border-color: var(--terracotta); color: var(--terracotta); }
+
+    .success-wrap {
+      text-align: center;
+      padding: 30px 20px;
+    }
+    .success-icon {
+      font-size: 64px;
+      margin-bottom: 20px;
+      display: block;
+      animation: pop 0.5s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    @keyframes pop {
+      from { transform: scale(0.5); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+    .success-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 30px;
+      font-weight: 300;
+      color: var(--charcoal);
+      margin-bottom: 10px;
+    }
+    .success-sub {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.6;
+      font-weight: 300;
+      max-width: 300px;
+      margin: 0 auto 28px;
+    }
+    .success-email-highlight {
+      display: inline-block;
+      background: rgba(196,98,45,0.1);
+      color: var(--terracotta);
+      border-radius: 8px;
+      padding: 2px 8px;
+      font-weight: 500;
+    }
+
+    .error-msg {
+      font-size: 12px;
+      color: #c0392b;
+      margin-top: 6px;
+      display: none;
+    }
+    .error-msg.show { display: block; }
+
+    .back-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0;
+      margin-bottom: 18px;
+      transition: color 0.2s;
+    }
+    .back-btn:hover { color: var(--terracotta); }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <span class="logo">✦ Welcome to Badito's Services</span>
+    <h1>What would you<br><em>like today?</em></h1>
+    <p>Premium personal services and excellent for you.</p>
+  </header>
+
+  <div class="progress-wrap">
+    <div class="progress-steps">
+      <div class="step-dot active" id="dot1">1</div>
+      <div class="step-line" id="line1"></div>
+      <div class="step-dot" id="dot2">2</div>
+      <div class="step-line" id="line2"></div>
+      <div class="step-dot" id="dot3">3</div>
+      <div class="step-line" id="line3"></div>
+      <div class="step-dot" id="dot4">4</div>
+    </div>
+    <div class="step-labels">
+      <span class="step-label active" id="lbl1" style="flex-shrink:0;width:28px;text-align:center">Pick</span>
+      <span class="step-label" id="lbl2" style="flex:1;text-align:center">Options</span>
+      <span class="step-label" id="lbl3" style="flex:1;text-align:center">Schedule</span>
+      <span class="step-label" id="lbl4" style="flex-shrink:0;width:28px;text-align:center">Done</span>
+    </div>
+  </div>
+
+  <!-- STEP 1: Choose Services -->
+  <div class="screen active" id="step1">
+    <p class="section-title">Choose your services</p>
+    <p class="section-sub">Select one or more — mix and match freely.</p>
+
+    <div class="service-grid">
+      <div class="service-card" data-id="cooking" onclick="toggleService('cooking',this)">
+        <span class="check">✓</span>
+        <span class="icon">🍳</span>
+        <span class="name">Cooking</span>
+        <span class="desc">Home-cooked meals made with care</span>
+      </div>
+      <div class="service-card" data-id="cleaning" onclick="toggleService('cleaning',this)">
+        <span class="check">✓</span>
+        <span class="icon">🧹</span>
+        <span class="name">Cleaning</span>
+        <span class="desc">Spotless spaces, stress-free living</span>
+      </div>
+      <div class="service-card" data-id="lifting" onclick="toggleService('lifting',this)">
+        <span class="check">✓</span>
+        <span class="icon">💪</span>
+        <span class="name">Lifting</span>
+        <span class="desc">Heavy items moved with ease</span>
+      </div>
+      <div class="service-card" data-id="talking" onclick="toggleService('talking',this)">
+        <span class="check">✓</span>
+        <span class="icon">💬</span>
+        <span class="name">Talking</span>
+        <span class="desc">Friendly conversation & guidance</span>
+      </div>
+    </div>
+
+    <div style="margin-top:24px">
+      <button class="btn-primary" id="step1Btn" onclick="goToStep2()" disabled>
+        Continue →
+      </button>
+    </div>
+  </div>
+
+  <!-- STEP 2: Sub-Options -->
+  <div class="screen" id="step2">
+    <button class="back-btn" onclick="goBack(1)">← Back</button>
+    <p class="section-title">Customise your order</p>
+    <p class="section-sub">Select all options that apply to each service.</p>
+
+    <div class="service-section" id="sec-cooking">
+      <div class="section-header">
+        <span class="s-icon">🍳</span>
+        <span class="s-name">Cooking</span>
+      </div>
+      <div class="sub-grid">
+        <div class="sub-card" data-svc="cooking" data-val="Breakfast" onclick="toggleSub(this)">
+          <span class="sub-icon">🥐</span>
+          <div class="sub-info"><div class="sub-name">Breakfast</div><div class="sub-desc">Morning meals to start your day right</div></div>
+          <div class="sub-check">✓</div>
+        </div>
+        <div class="sub-card" data-svc="cooking" data-val="Lunch" onclick="toggleSub(this)">
+          <span class="sub-icon">🥗</span>
+          <div class="sub-info"><div class="sub-name">Lunch</div><div class="sub-desc">Wholesome midday meals</div></div>
+          <div class="sub-check">✓</div>
+        </div>
+        <div class="sub-card" data-svc="cooking" data-val="Dinner" onclick="toggleSub(this)">
+          <span class="sub-icon">🍽️</span>
+          <div class="sub-info"><div class="sub-name">Dinner</div><div class="sub-desc">A relaxed and satisfying evening meal</div></div>
+          <div class="sub-check">✓</div>
+        </div>
+        <div class="sub-card" data-svc="cooking" data-val="Snacking" onclick="toggleSub(this)">
+          <span class="sub-icon">🍎</span>
+          <div class="sub-info"><div class="sub-name">Snacking</div><div class="sub-desc">Light bites and treats throughout the day</div></div>
+          <div class="sub-check">✓</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="service-section" id="sec-cleaning">
+      <div class="section-header">
+        <span class="s-icon">🧹</span>
+        <span class="s-name">Cleaning</span>
+      </div>
+      <div class="sub-grid">
+        <div class="sub-card" data-svc="cleaning" data-val="Kitchen" onclick="toggleSub(this)">
+          <span class="sub-icon">🍴</span>
+          <div class="sub-info"><div class="sub-name">Kitchen</div><div class="sub-desc">Worktops, appliances, floors & sink</div></div>
+          <div class="sub-check">✓</div>
+        </div>
+        <div class="sub-card" data-svc="cleaning" data-val="Bathroom" onclick="toggleSub(this)">
+          <span class="sub-icon">🚿</span>
+          <div class="sub-info"><div class="sub-name">Bathroom</div><div class="sub-desc">Scrub, sanitise and sparkle</div></div>
+          <div class="sub-check">✓</div>
+        </div>
+        <div class="sub-card" data-svc="cleaning" data-val="Living Room" onclick="toggleSub(this)">
+          <span class="sub-icon">🛋️</span>
+          <div class="sub-info"><div class="sub-name">Living Room</div><div class="sub-desc">Dust, vacuum and tidy your lounge</div></div>
+          <div class="sub-check">✓</div>
+        </div>
+        <div class="sub-card" data-svc="cleaning" data-val="Full House" onclick="toggleSub(this)">
+          <span class="sub-icon">🏠</span>
+          <div class="sub-info"><div class="sub-name">Full House</div><div class="sub-desc">Top-to-bottom deep clean</div></div>
+          <div class="sub-check">✓</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="service-section" id="sec-lifting">
+      <div class="section-header">
+        <span class="s-icon">💪</span>
+        <span class="s-name">Lifting</span>
+      </div>
+      <div class="sub-grid">
+        <div class="sub-card" data-svc="lifting" data-val="Furniture Moving" onclick="toggleSub(this)">
+          <span class="sub-icon">🪑</span>
+          <div class="sub-info"><div class="sub-name">Furniture Moving</div><div class="sub-desc">Rearrange or relocate heavy furniture</div></div>
+          <div class="sub-check">✓</div>
+        </div>
+        <div class="sub-card" data-svc="lifting" data-val="Storage Help" onclick="toggleSub(this)">
+          <span class="sub-icon">📦</span>
+          <div class="sub-info"><div class="sub-name">Storage Help</div><div class="sub-desc">Pack, unpack and organise boxes</div></div>
+          <div class="sub-check">✓</div>
+        </div>
+        <div class="sub-card" data-svc="lifting" data-val="Heavy Deliveries" onclick="toggleSub(this)">
+          <span class="sub-icon">🚚</span>
+          <div class="sub-info"><div class="sub-name">Heavy Deliveries</div><div class="sub-desc">Receive and carry in large items</div></div>
+          <div class="sub-check">✓</div>
+        </div>
+        <div class="sub-card" data-svc="lifting" data-val="Setup & Assembly" onclick="toggleSub(this)">
+          <span class="sub-icon">🔧</span>
+          <div class="sub-info"><div class="sub-name">Setup & Assembly</div><div class="sub-desc">Build flat-pack or assemble equipment</div></div>
+          <div class="sub-check">✓</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="service-section" id="sec-talking">
+      <div class="section-header">
+        <span class="s-icon">💬</span>
+        <span class="s-name">Talking</span>
+      </div>
+      <div class="sub-grid">
+        <div class="sub-card" data-svc="talking" data-val="Companionship" onclick="toggleSub(this)">
+          <span class="sub-icon">☕</span>
+          <div class="sub-info"><div class="sub-name">Companionship</div><div class="sub-desc">Friendly conversation over tea or a walk</div></div>
+          <div class="sub-check">✓</div>
+        </div>
+        <div class="sub-card" data-svc="talking" data-val="Life Advice" onclick="toggleSub(this)">
+          <span class="sub-icon">🌱</span>
+          <div class="sub-info"><div class="sub-name">Life Advice</div><div class="sub-desc">A thoughtful ear for your challenges</div></div>
+          <div class="sub-check">✓</div>
+        </div>
+        <div class="sub-card" data-svc="talking" data-val="Language Practice" onclick="toggleSub(this)">
+          <span class="sub-icon">🌍</span>
+          <div class="sub-info"><div class="sub-name">Language Practice</div><div class="sub-desc">Conversational practice in a new language</div></div>
+          <div class="sub-check">✓</div>
+        </div>
+        <div class="sub-card" data-svc="talking" data-val="Story Sharing" onclick="toggleSub(this)">
+          <span class="sub-icon">📖</span>
+          <div class="sub-info"><div class="sub-name">Story Sharing</div><div class="sub-desc">Share memories, stories or creative ideas</div></div>
+          <div class="sub-check">✓</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:24px">
+      <button class="btn-primary" id="step2Btn" onclick="goToStep3()" disabled>Continue →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: Schedule -->
+  <div class="screen" id="step3">
+    <button class="back-btn" onclick="goBack(2)">← Back</button>
+    <p class="section-title">Schedule & details</p>
+    <p class="section-sub">When would you like your service?</p>
+
+    <div class="datetime-grid">
+      <div>
+        <p class="field-label">Date</p>
+        <input type="date" class="field-input" id="schedDate" onchange="checkStep3()" />
+      </div>
+      <div>
+        <p class="field-label">Time</p>
+        <input type="time" class="field-input" id="schedTime" onchange="checkStep3()" />
+      </div>
+      <div class="field-full">
+        <p class="field-label">Address</p>
+        <input type="text" class="field-input" id="schedAddr" placeholder="Your full address" oninput="checkStep3()" />
+      </div>
+    </div>
+
+    <div>
+      <p class="field-label" style="margin-bottom:6px">Special notes (optional)</p>
+      <textarea class="notes-input" id="schedNotes" placeholder="Dietary requirements, access codes, preferences…"></textarea>
+    </div>
+
+    <div style="margin-top:20px">
+      <button class="btn-primary" id="step3Btn" onclick="goToStep4()" disabled>Review Order →</button>
+    </div>
+  </div>
+
+  <!-- STEP 4: Confirm -->
+  <div class="screen" id="step4">
+    <button class="back-btn" onclick="goBack(3)">← Back</button>
+    <p class="section-title">Review & confirm</p>
+    <p class="section-sub">Everything look right? Then we'll send your order.</p>
+
+    <div class="summary-card" id="summaryCard"></div>
+
+    <div class="email-wrap">
+      <p class="field-label">Send confirmation to</p>
+      <input type="email" class="field-input" id="emailInput" placeholder="your@email.com" oninput="checkStep4()" style="border-radius:8px" />
+      <p class="error-msg" id="emailError">Please enter a valid email address.</p>
+    </div>
+
+    <button class="btn-primary" id="step4Btn" onclick="submitOrder()" disabled>✉ Send My Order</button>
+  </div>
+
+  <!-- SUCCESS -->
+  <div class="screen" id="stepSuccess">
+    <div class="success-wrap">
+      <span class="success-icon">🎉</span>
+      <h2 class="success-title">Order Sent!</h2>
+      <p class="success-sub">
+        Your confirmation has been sent to<br>
+        <span class="success-email-highlight" id="confirmedEmail"></span><br><br>
+        We'll be in touch shortly to confirm your booking.
+      </p>
+      <button class="btn-primary" onclick="resetAll()">Book Another Service</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const state = {
+    services: new Set(),
+    subs: {},
+    date: '', time: '', address: '', notes: '', email: ''
+  };
+
+  const servicesMeta = {
+    cooking:  { icon: '🍳', label: 'Cooking' },
+    cleaning: { icon: '🧹', label: 'Cleaning' },
+    lifting:  { icon: '💪', label: 'Lifting' },
+    talking:  { icon: '💬', label: 'Talking' }
+  };
+
+  function toggleService(id, el) {
+    el.classList.toggle('selected');
+    if (state.services.has(id)) {
+      state.services.delete(id);
+      delete state.subs[id];
+    } else {
+      state.services.add(id);
+      state.subs[id] = [];
+    }
+    document.getElementById('step1Btn').disabled = state.services.size === 0;
+  }
+
+  function goToStep2() {
+    ['cooking','cleaning','lifting','talking'].forEach(id => {
+      document.getElementById('sec-' + id).classList.toggle('visible', state.services.has(id));
+    });
+    document.querySelectorAll('.sub-card').forEach(card => {
+      if (!state.services.has(card.dataset.svc)) card.classList.remove('selected');
+    });
+    showStep(2);
+    checkStep2();
+  }
+
+  function toggleSub(card) {
+    const svc = card.dataset.svc;
+    const val = card.dataset.val;
+    card.classList.toggle('selected');
+    if (!state.subs[svc]) state.subs[svc] = [];
+    const idx = state.subs[svc].indexOf(val);
+    if (idx >= 0) state.subs[svc].splice(idx, 1);
+    else state.subs[svc].push(val);
+    checkStep2();
+  }
+
+  function checkStep2() {
+    const allOk = [...state.services].every(id => (state.subs[id] || []).length > 0);
+    document.getElementById('step2Btn').disabled = !allOk;
+  }
+
+  function goToStep3() { showStep(3); checkStep3(); }
+
+  function checkStep3() {
+    const d = document.getElementById('schedDate').value;
+    const t = document.getElementById('schedTime').value;
+    const a = document.getElementById('schedAddr').value.trim();
+    document.getElementById('step3Btn').disabled = !(d && t && a);
+  }
+
+  function goToStep4() {
+    state.date    = document.getElementById('schedDate').value;
+    state.time    = document.getElementById('schedTime').value;
+    state.address = document.getElementById('schedAddr').value.trim();
+    state.notes   = document.getElementById('schedNotes').value.trim();
+    buildSummary();
+    showStep(4);
+    checkStep4();
+  }
+
+  function buildSummary() {
+    const fmt = dt => {
+      const [y,m,d] = dt.split('-');
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      return `${d} ${months[+m-1]} ${y}`;
+    };
+    const fmtTime = t => {
+      const [h, mn] = t.split(':').map(Number);
+      return `${h % 12 || 12}:${String(mn).padStart(2,'0')} ${h >= 12 ? 'pm' : 'am'}`;
+    };
+
+    let rows = '';
+    state.services.forEach(id => {
+      const meta = servicesMeta[id];
+      const subs = state.subs[id] || [];
+      rows += `<div class="summary-row">
+        <span class="summary-label">${meta.icon} ${meta.label}</span>
+        <span class="summary-value">${subs.map(s=>`<span class="summary-tag">${s}</span>`).join('')}</span>
+      </div>`;
+    });
+
+    document.getElementById('summaryCard').innerHTML = `
+      <div class="summary-title">✦ Your Order</div>
+      ${rows}
+      <div class="summary-row">
+        <span class="summary-label">📅 When</span>
+        <span class="summary-value">${fmt(state.date)} at ${fmtTime(state.time)}</span>
+      </div>
+      <div class="summary-row">
+        <span class="summary-label">📍 Address</span>
+        <span class="summary-value">${state.address}</span>
+      </div>
+      ${state.notes ? `<div class="summary-row">
+        <span class="summary-label">📝 Notes</span>
+        <span class="summary-value">${state.notes}</span>
+      </div>` : ''}
+    `;
+  }
+
+  function checkStep4() {
+    const v = document.getElementById('emailInput').value.trim();
+    const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+    document.getElementById('step4Btn').disabled = !ok;
+    document.getElementById('emailError').classList.toggle('show', v.length > 0 && !ok);
+  }
+
+  function submitOrder() {
+    state.email = document.getElementById('emailInput').value.trim();
+
+    const fmt = dt => {
+      const [y,m,d] = dt.split('-');
+      const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+      return `${d} ${months[+m-1]} ${y}`;
+    };
+    const fmtTime = t => {
+      const [h, mn] = t.split(':').map(Number);
+      return `${h % 12 || 12}:${String(mn).padStart(2,'0')} ${h >= 12 ? 'pm' : 'am'}`;
+    };
+
+    let serviceLines = '';
+    state.services.forEach(id => {
+      const meta = servicesMeta[id];
+      serviceLines += `${meta.icon} ${meta.label}: ${state.subs[id].join(', ')}\n`;
+    });
+
+    const subject = encodeURIComponent('Your Serva Order Confirmation');
+    const body = encodeURIComponent(
+`Hi there,
+
+Thank you for booking with Serva! Here is a summary of your order:
+
+YOUR SERVICES
+━━━━━━━━━━━━━━━━━━━━━━━━
+${serviceLines}
+Date & Time: ${fmt(state.date)} at ${fmtTime(state.time)}
+Address: ${state.address}
+${state.notes ? `Notes: ${state.notes}` : ''}
+━━━━━━━━━━━━━━━━━━━━━━━━
+
+We will be in touch shortly to confirm your booking!
+
+With care,
+The Serva Team`
+    );
+
+    window.location.href = `mailto:${state.email}?subject=${subject}&body=${body}`;
+
+    document.getElementById('confirmedEmail').textContent = state.email;
+    showStep('Success');
+  }
+
+  function showStep(n) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('step' + n).classList.add('active');
+    updateProgress(n);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function goBack(n) { showStep(n); }
+
+  function updateProgress(step) {
+    for (let i = 1; i <= 4; i++) {
+      const dot = document.getElementById('dot' + i);
+      const lbl = document.getElementById('lbl' + i);
+      if (!dot) continue;
+      dot.classList.remove('active','done');
+      if (lbl) lbl.classList.remove('active');
+      if (i < step) { dot.classList.add('done'); dot.textContent = '✓'; }
+      else if (i == step) { dot.classList.add('active'); dot.textContent = i; if (lbl) lbl.classList.add('active'); }
+      else { dot.textContent = i; }
+    }
+    for (let i = 1; i <= 3; i++) {
+      const line = document.getElementById('line' + i);
+      if (line) line.classList.toggle('done', i < step);
+    }
+  }
+
+  function resetAll() {
+    state.services.clear();
+    state.subs = {};
+    state.date = state.time = state.address = state.notes = state.email = '';
+    document.querySelectorAll('.service-card').forEach(c => c.classList.remove('selected'));
+    document.querySelectorAll('.sub-card').forEach(c => c.classList.remove('selected'));
+    document.getElementById('schedDate').value = '';
+    document.getElementById('schedTime').value = '';
+    document.getElementById('schedAddr').value = '';
+    document.getElementById('schedNotes').value = '';
+    document.getElementById('emailInput').value = '';
+    document.getElementById('step1Btn').disabled = true;
+    showStep(1);
+  }
+
+  document.getElementById('schedDate').min = new Date().toISOString().split('T')[0];
+</script>
+</body>
+</html>
